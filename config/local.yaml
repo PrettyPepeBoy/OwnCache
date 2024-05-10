@@ -1,0 +1,6 @@
+env: "local"
+cleanup_interval: 1h
+http_server:
+  port: "localhost:8081"
+  idle_timeout: 60s
+  timeout: 4s
