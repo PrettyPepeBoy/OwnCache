@@ -3,6 +3,7 @@ package wordsCache
 import (
 	"FirstTry/internal/cache"
 	"encoding/json"
+	"fmt"
 	"github.com/go-chi/render"
 	"io"
 	"log/slog"
@@ -14,11 +15,11 @@ type Response struct {
 	Err        error `json:"err,omitempty"`
 }
 
-type letter struct {
-	Ltr string `json:"letter"`
+type Word struct {
+	ProductName string `json:"product_name"`
 }
 
-func AddInCacheLetter(logger *slog.Logger, cache *cache.CacheForWords) http.HandlerFunc {
+func AddInCacheWord(logger *slog.Logger, cache *cache.WordsCache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rawByte, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -26,15 +27,37 @@ func AddInCacheLetter(logger *slog.Logger, cache *cache.CacheForWords) http.Hand
 			response(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		var ltr letter
-		err = json.Unmarshal(rawByte, &ltr)
+
 		if err != nil {
 			logger.Error("failed to unmarshall json request", err)
 			response(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		cache.Put(ltr.Ltr[0])
+
+		cache.PutWord(rawByte)
+
 		logger.Info("successfully added in cache")
+		response(w, r, http.StatusOK, nil)
+	}
+}
+
+func GetWord(logger *slog.Logger, cache *cache.WordsCache) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		rawByte, err := io.ReadAll(r.Body)
+		if err != nil {
+			logger.Error("failed to read request body", err)
+			response(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		var word Word
+		err = json.Unmarshal(rawByte, &word)
+		if err != nil {
+			logger.Error("failed to unmarshall json request", err)
+			response(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		slc := cache.GetWord([]byte(word.ProductName))
+		logger.Info(fmt.Sprintf("succesfully get word %s from %s", slc, word.ProductName))
 		response(w, r, http.StatusOK, nil)
 	}
 }

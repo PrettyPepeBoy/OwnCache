@@ -12,10 +12,10 @@ type Request struct {
 }
 
 type Response struct {
-	Status int     `json:"status"`
-	Error  error   `json:"error"`
-	Key    int64   `json:"key"`
-	Value  []int64 `json:"value"`
+	Status int      `json:"status"`
+	Error  error    `json:"error"`
+	Key    int64    `json:"key"`
+	Value  []string `json:"value"`
 }
 
 func ShowCache(logger *slog.Logger, cache *cache.Cache) http.HandlerFunc {
@@ -37,7 +37,7 @@ func ShowCache(logger *slog.Logger, cache *cache.Cache) http.HandlerFunc {
 	}
 }
 
-func response(w http.ResponseWriter, r *http.Request, status int, err error, key int64, value []int64) {
+func response(w http.ResponseWriter, r *http.Request, status int, err error, key int64, value []string) {
 	render.JSON(w, r, Response{
 		Status: status,
 		Error:  err,

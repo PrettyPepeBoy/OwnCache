@@ -14,7 +14,7 @@ type Cache struct {
 }
 
 type Item struct {
-	values []int64
+	values []string
 }
 
 func NewCache(cleanupInterval time.Duration, logger *slog.Logger) *Cache {
@@ -27,7 +27,7 @@ func NewCache(cleanupInterval time.Duration, logger *slog.Logger) *Cache {
 	return &cache
 }
 
-func (c *Cache) SetKey(key, value int64) {
+func (c *Cache) SetKey(key int64, value string) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 	if !slices.Contains(c.items[key].values, value) {
@@ -37,7 +37,7 @@ func (c *Cache) SetKey(key, value int64) {
 	}
 }
 
-func (c *Cache) ShowCache(key int64) ([]int64, bool) {
+func (c *Cache) ShowCache(key int64) ([]string, bool) {
 	value, ok := c.items[key]
 	if !ok {
 		return nil, false

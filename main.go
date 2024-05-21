@@ -22,7 +22,7 @@ func main() {
 	cfg := config.MustSetupConfig()
 	logger := setupLogger(cfg.Env)
 	ch := cache.NewCache(cfg.CleanupInterval, logger)
-	chWords := cache.NewChForWords(cfg.CleanupInterval)
+	chWords := cache.NewWordsCache(cfg.CleanupInterval, logger)
 
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
@@ -31,7 +31,8 @@ func main() {
 
 	router.Route("/cache", func(r chi.Router) {
 		r.Post("/users", users.AddInCacheUsersAndProductId(logger, ch))
-		r.Post("/words", wordsCache.AddInCacheLetter(logger, chWords))
+		r.Post("/words", wordsCache.AddInCacheWord(logger, chWords))
+		r.Get("/words", wordsCache.GetWord(logger, chWords))
 		r.Get("/", cacheHandler.ShowCache(logger, ch))
 	})
 

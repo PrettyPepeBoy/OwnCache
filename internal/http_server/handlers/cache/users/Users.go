@@ -7,11 +7,12 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type usersAndProductId struct {
-	UserId    int64 `json:"user_id"`
-	ProductId int64 `json:"product_id"`
+	UserId    int64  `json:"user_id"`
+	ProductId string `json:"product_name"`
 }
 
 type Response struct {
@@ -21,6 +22,7 @@ type Response struct {
 
 func AddInCacheUsersAndProductId(logger *slog.Logger, cache *cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := time.Now()
 		var usrProduct usersAndProductId
 		rawByte, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -37,6 +39,7 @@ func AddInCacheUsersAndProductId(logger *slog.Logger, cache *cache.Cache) http.H
 		}
 		cache.SetKey(usrProduct.UserId, usrProduct.ProductId)
 		logger.Info("successfully added in cache")
+		logger.Info("How much time was spend", slog.String("time spend", time.Since(t).String()))
 		response(w, r, http.StatusOK, nil)
 	}
 }
